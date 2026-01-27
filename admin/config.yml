@@ -4,10 +4,10 @@ backend:
 
 # Store uploaded images in the images folder
 media_folder: "images"
-public_folder: "/images"
+public_folder: "images"
 
 # Site URL for previews
-site_url: https://your-site-name.netlify.app
+site_url: https://ericrenaudrealestate.netlify.app
 
 collections:
   # Properties Collection - Add/Edit/Remove property cards

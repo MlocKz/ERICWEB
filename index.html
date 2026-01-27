@@ -1547,10 +1547,18 @@ Notes: ${data.notes || 'None'}
                             if (property.visible !== false) {
                                 properties.push(property);
                             }
+                        } else {
+                            console.warn('Failed to load property file:', file, response.status);
                         }
                     } catch (e) {
-                        console.log('Could not load:', file);
+                        console.error('Error loading property:', file, e);
                     }
+                }
+                
+                if (properties.length === 0) {
+                    console.warn('No properties loaded. Check that JSON files exist and are accessible.');
+                    grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Properties loading...</p>';
+                    return;
                 }
                 
                 // Sort by order
