@@ -1300,19 +1300,6 @@
     </style>
 </head>
 <body>
-    <!-- Admin Bar (shown when logged in) -->
-    <div class="admin-bar" id="adminBar">
-        <div class="admin-bar-left">
-            <span class="admin-bar-title">🔧 Admin Mode</span>
-            <span id="adminUserName" style="font-size: 13px; opacity: 0.8;"></span>
-        </div>
-        <div class="admin-bar-actions">
-            <button class="admin-btn admin-login-btn" onclick="adminLogin()" style="display: none;">Login to Edit</button>
-            <button class="admin-btn" onclick="window.open('/admin/', '_blank')" style="display: none;" id="openCMSBtn">Open Full CMS</button>
-            <button class="admin-btn admin-btn-secondary" onclick="adminLogout()" style="display: none;" id="logoutBtn">Logout</button>
-        </div>
-    </div>
-
     <div class="bg-pattern"></div>
 
     <div class="container">
@@ -1809,96 +1796,14 @@ Notes: ${data.notes || 'None'}
         // Load properties on page load
         loadProperties();
         
-        // Admin Panel - Show admin bar when logged in
-        let currentUser = null;
-        
-        function showAdminBar(user) {
-            currentUser = user;
-            const adminBar = document.getElementById('adminBar');
-            const userName = document.getElementById('adminUserName');
-            
-            if (adminBar && user) {
-                adminBar.classList.add('active');
-                adminBar.classList.remove('show-login');
-                document.body.classList.add('admin-mode');
-                
-                // Update title
-                const title = adminBar.querySelector('.admin-bar-title');
-                if (title) title.textContent = '🔧 Admin Mode';
-                
-                if (userName) {
-                    userName.textContent = user.email || 'Admin';
-                }
-                
-                // Show/hide buttons based on login status
-                const loginBtn = adminBar.querySelector('.admin-login-btn');
-                const cmsBtn = document.getElementById('openCMSBtn');
-                const logoutBtn = document.getElementById('logoutBtn');
-                
-                if (loginBtn) loginBtn.style.display = 'none';
-                if (cmsBtn) cmsBtn.style.display = 'block';
-                if (logoutBtn) logoutBtn.style.display = 'block';
-                
-                // Add edit indicators to editable sections
-                document.querySelectorAll('.editable-section').forEach(section => {
-                    if (!section.querySelector('.edit-indicator')) {
-                        const indicator = document.createElement('div');
-                        indicator.className = 'edit-indicator';
-                        indicator.textContent = '✏️ Edit';
-                        indicator.onclick = () => openAdminCMS();
-                        section.appendChild(indicator);
-                    }
-                });
-            } else if (adminBar) {
-                adminBar.classList.remove('active');
-                adminBar.classList.add('show-login');
-                document.body.classList.remove('admin-mode');
-                
-                // Show login button when not logged in
-                const loginBtn = adminBar.querySelector('.admin-login-btn');
-                const cmsBtn = document.getElementById('openCMSBtn');
-                const logoutBtn = document.getElementById('logoutBtn');
-                
-                if (loginBtn) loginBtn.style.display = 'block';
-                if (cmsBtn) cmsBtn.style.display = 'none';
-                if (logoutBtn) logoutBtn.style.display = 'none';
-                
-                // Update title
-                const title = adminBar.querySelector('.admin-bar-title');
-                if (title) title.textContent = '🔐 Admin Login';
-                if (userName) userName.textContent = '';
-            }
-        }
-
-        function adminLogin() {
-            if (window.netlifyIdentity) {
-                window.netlifyIdentity.open('login');
-            }
-        }
-
-        function adminLogout() {
-            if (window.netlifyIdentity) {
-                window.netlifyIdentity.logout();
-            }
-        }
-
-        function openAdminCMS() {
-            window.open('/admin/', '_blank');
-        }
-
-        // Initialize Netlify Identity
+        // Netlify Identity - redirect to admin on login
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
-                showAdminBar(user);
+                // User already logged in
             });
             
-            window.netlifyIdentity.on("login", user => {
-                showAdminBar(user);
-                window.netlifyIdentity.close();
-            });
-            
-            window.netlifyIdentity.on("logout", () => {
-                showAdminBar(null);
+            window.netlifyIdentity.on("login", () => {
+                window.location.href = "/admin/";
             });
         }
     </script>
