@@ -1,0 +1,70 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# Store uploaded images in the images folder
+media_folder: "images"
+public_folder: "/images"
+
+# Site URL for previews
+site_url: https://your-site-name.netlify.app
+
+collections:
+  # Properties Collection - Add/Edit/Remove property cards
+  - name: "properties"
+    label: "Properties"
+    label_singular: "Property"
+    folder: "data/properties"
+    create: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
+    fields:
+      - { label: "Address", name: "address", widget: "string", hint: "e.g. 831 Dawson Road" }
+      - { label: "City", name: "city", widget: "string", default: "Windsor, Ontario" }
+      - { label: "Property Image", name: "image", widget: "image", hint: "Upload a photo of the property" }
+      - label: "Investment Type"
+        name: "type"
+        widget: "select"
+        options:
+          - { label: "Rental", value: "rental" }
+          - { label: "Fixer Upper", value: "fixer" }
+          - { label: "Multi-Family", value: "multi" }
+          - { label: "Commercial", value: "commercial" }
+      - label: "Strategy"
+        name: "strategy"
+        widget: "select"
+        options:
+          - { label: "Buy & Hold / Cash Flow", value: "buyhold" }
+          - { label: "Fix & Flip", value: "fixflip" }
+          - { label: "BRRRR", value: "brrrr" }
+          - { label: "House Hack", value: "househack" }
+      - { label: "Description", name: "description", widget: "text", hint: "Brief description of the deal" }
+      - { label: "Display Order", name: "order", widget: "number", default: 1, hint: "Lower numbers appear first" }
+      - { label: "Show on Site", name: "visible", widget: "boolean", default: true }
+
+  # Site Settings - Contact info, social links
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - name: "contact"
+        label: "Contact Information"
+        file: "data/settings.json"
+        fields:
+          - { label: "Full Name", name: "name", widget: "string", default: "Eric Renaud" }
+          - { label: "Title", name: "title", widget: "string", default: "Real Estate & Investment Specialist" }
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "Phone", name: "phone", widget: "string" }
+          - { label: "Instagram URL", name: "instagram", widget: "string" }
+          - { label: "LinkedIn URL", name: "linkedin", widget: "string" }
+          - label: "Bio Text"
+            name: "bio"
+            widget: "text"
+            hint: "The main description text on the landing page"
+          - label: "Stats"
+            name: "stats"
+            widget: "list"
+            max: 3
+            fields:
+              - { label: "Value", name: "value", widget: "string", hint: "e.g. 2+" }
+              - { label: "Label", name: "label", widget: "string", hint: "e.g. YEARS EXP" }

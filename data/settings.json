@@ -1,0 +1,14 @@
+{
+  "name": "Eric Renaud",
+  "title": "Real Estate & Investment Specialist",
+  "email": "erenaudrealtor@gmail.com",
+  "phone": "(519) 562-1374",
+  "instagram": "https://www.instagram.com/ericrenaud_/",
+  "linkedin": "https://linkedin.com/in/ericrenaud",
+  "bio": "Building wealth through real estate. Whether you're buying your first property, growing your investment portfolio, or selling for top dollar — I'll help you make smart moves that maximize your returns.",
+  "stats": [
+    { "value": "2+", "label": "YEARS EXP" },
+    { "value": "$1M+", "label": "IN DEALS" },
+    { "value": "100%", "label": "DEDICATED" }
+  ]
+}
