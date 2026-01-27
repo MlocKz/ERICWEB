@@ -1138,14 +1138,186 @@
                 font-size: 26px;
             }
         }
+
+        /* Admin Panel Styles */
+        .admin-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--charcoal);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .admin-bar.active,
+        .admin-bar.show-login {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .admin-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-bar-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .admin-bar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .admin-btn {
+            background: var(--gold);
+            color: var(--charcoal);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .admin-btn:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+        }
+
+        .admin-btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .admin-btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .edit-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--gold);
+            color: var(--charcoal);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        .editable-section:hover .edit-indicator {
+            opacity: 1;
+        }
+
+        .editable-section {
+            position: relative;
+        }
+
+        body.admin-mode {
+            padding-top: 50px;
+        }
+
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-modal.active {
+            display: flex;
+        }
+
+        .admin-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-modal h3 {
+            margin-top: 0;
+            color: var(--charcoal);
+        }
+
+        .admin-form-group {
+            margin-bottom: 20px;
+        }
+
+        .admin-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .admin-form-group input,
+        .admin-form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .admin-form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .admin-form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
     </style>
 </head>
 <body>
+    <!-- Admin Bar (shown when logged in) -->
+    <div class="admin-bar" id="adminBar">
+        <div class="admin-bar-left">
+            <span class="admin-bar-title">🔧 Admin Mode</span>
+            <span id="adminUserName" style="font-size: 13px; opacity: 0.8;"></span>
+        </div>
+        <div class="admin-bar-actions">
+            <button class="admin-btn admin-login-btn" onclick="adminLogin()" style="display: none;">Login to Edit</button>
+            <button class="admin-btn" onclick="window.open('/admin/', '_blank')" style="display: none;" id="openCMSBtn">Open Full CMS</button>
+            <button class="admin-btn admin-btn-secondary" onclick="adminLogout()" style="display: none;" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
     <div class="bg-pattern"></div>
 
     <div class="container">
         <!-- Hero -->
-        <section class="hero">
+        <section class="hero editable-section">
             <div class="profile-frame">
                 <div class="profile-image">ER</div>
             </div>
@@ -1223,7 +1395,7 @@
         </section>
 
         <!-- Investment Portfolio -->
-        <section class="portfolio-section">
+        <section class="portfolio-section editable-section">
             <h2 class="section-title">Recent Highlights</h2>
             <p class="portfolio-subtitle">A few of the many investment deals I've helped close</p>
             
@@ -1649,14 +1821,96 @@ Notes: ${data.notes || 'None'}
         // Load properties on page load
         loadProperties();
         
-        // Netlify Identity redirect after login
+        // Admin Panel - Show admin bar when logged in
+        let currentUser = null;
+        
+        function showAdminBar(user) {
+            currentUser = user;
+            const adminBar = document.getElementById('adminBar');
+            const userName = document.getElementById('adminUserName');
+            
+            if (adminBar && user) {
+                adminBar.classList.add('active');
+                adminBar.classList.remove('show-login');
+                document.body.classList.add('admin-mode');
+                
+                // Update title
+                const title = adminBar.querySelector('.admin-bar-title');
+                if (title) title.textContent = '🔧 Admin Mode';
+                
+                if (userName) {
+                    userName.textContent = user.email || 'Admin';
+                }
+                
+                // Show/hide buttons based on login status
+                const loginBtn = adminBar.querySelector('.admin-login-btn');
+                const cmsBtn = document.getElementById('openCMSBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (cmsBtn) cmsBtn.style.display = 'block';
+                if (logoutBtn) logoutBtn.style.display = 'block';
+                
+                // Add edit indicators to editable sections
+                document.querySelectorAll('.editable-section').forEach(section => {
+                    if (!section.querySelector('.edit-indicator')) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'edit-indicator';
+                        indicator.textContent = '✏️ Edit';
+                        indicator.onclick = () => openAdminCMS();
+                        section.appendChild(indicator);
+                    }
+                });
+            } else if (adminBar) {
+                adminBar.classList.remove('active');
+                adminBar.classList.add('show-login');
+                document.body.classList.remove('admin-mode');
+                
+                // Show login button when not logged in
+                const loginBtn = adminBar.querySelector('.admin-login-btn');
+                const cmsBtn = document.getElementById('openCMSBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                
+                if (loginBtn) loginBtn.style.display = 'block';
+                if (cmsBtn) cmsBtn.style.display = 'none';
+                if (logoutBtn) logoutBtn.style.display = 'none';
+                
+                // Update title
+                const title = adminBar.querySelector('.admin-bar-title');
+                if (title) title.textContent = '🔐 Admin Login';
+                if (userName) userName.textContent = '';
+            }
+        }
+
+        function adminLogin() {
+            if (window.netlifyIdentity) {
+                window.netlifyIdentity.open('login');
+            }
+        }
+
+        function adminLogout() {
+            if (window.netlifyIdentity) {
+                window.netlifyIdentity.logout();
+            }
+        }
+
+        function openAdminCMS() {
+            window.open('/admin/', '_blank');
+        }
+
+        // Initialize Netlify Identity
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
-                if (!user) {
-                    window.netlifyIdentity.on("login", () => {
-                        document.location.href = "/admin/";
-                    });
-                }
+                showAdminBar(user);
+            });
+            
+            window.netlifyIdentity.on("login", user => {
+                showAdminBar(user);
+                window.netlifyIdentity.close();
+            });
+            
+            window.netlifyIdentity.on("logout", () => {
+                showAdminBar(null);
             });
         }
     </script>
